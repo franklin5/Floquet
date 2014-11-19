@@ -1,0 +1,37 @@
+In this directory, we have input.txt and input_bdg_bulk.txt
+
+script run assumes executable floquet is a symbolic link to executable in src directory.
+
+Example readin files are shown here (for time-independent problem, PMAX=0):
+-- input.txt --
+Hamiltonian     bdg
+topology        bulk
+
+-- input_bdg_bulk.txt --
+PMAX    0
+NKX     201
+
+h       1.2
+mu      0.2
+T       25.0
+Delta0  0.5
+v       1.2
+
+kmax    5
+chern   connection
+
+-- or --
+PMAX    0
+NKX     201
+
+h       1.2
+mu      0.2
+T       25.0
+Delta0  0.5
+v       1.2
+
+kmax    5
+chern   curvature
+
+
+

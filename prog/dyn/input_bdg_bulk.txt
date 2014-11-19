@@ -1,0 +1,10 @@
+PMAX	1
+NKX	51
+
+h	0.9
+mu	0.054992029689910
+T	20.5
+v	1.2
+
+kmax	2
+chern	curvature

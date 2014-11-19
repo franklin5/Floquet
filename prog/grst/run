@@ -1,0 +1,7 @@
+#!/bin/bash 
+#make clean
+cd /home/ld7/workspace/Floquet/src
+make
+cd /home/ld7/workspace/Floquet/bdg_bulk/grst
+mpirun -np 6 floquet 
+#./floquet
