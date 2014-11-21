@@ -22,7 +22,9 @@ void cBdG_Edge::file_input(){
       fscanf(input_bdg,"%s %d", dummyname, &intdummyvalue);
       _NKX = intdummyvalue;	if (ig == _root) cout << dummyname << "=" << _NKX << endl;
       fscanf(input_bdg,"%s %lf", dummyname, &dummyvalue);
-      _h = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _h << endl;
+      _hi = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _hi << endl;
+      fscanf(input_bdg,"%s %lf", dummyname, &dummyvalue);
+      _hf = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _hf << endl;
       fscanf(input_bdg,"%s %lf", dummyname, &dummyvalue);
       _mu = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _mu << endl;
       fscanf(input_bdg,"%s %lf", dummyname, &dummyvalue);
@@ -61,29 +63,42 @@ void cBdG_Edge::update(int nkx){
     _bdg_H.setZero(); // This is done only once.
     // The off-diagonal coupling introduced from time-dependent order parameter should be computed only here.
     double dt = 0.0005;int lenT = int(_T/dt);
-    VectorXcd Delta_t(lenT+1000);Delta_t.setZero();
-    FILE *R_Delta, *I_Delta;
-    R_Delta = fopen("Rdata_2109.dat","r");
-    I_Delta = fopen("Idata_2109.dat","r");
-    assert(R_Delta != NULL);assert(I_Delta != NULL);
-    int count = 0;
-    double reD, imD;
-    while (fscanf(R_Delta, "%lf", &reD) != EOF && fscanf(I_Delta, "%lf", &imD) != EOF ){
-      Delta_t(count) = complex<double>(reD,imD);
-      count++;
-    }
-    fclose(R_Delta);fclose(I_Delta);
+    double *time_t = new double [lenT+100];
+    double *DELTA_r_t = new double [lenT+100];
+    double *DELTA_i_t = new double [lenT+100];
+//    FILE *input;
+//    char filename[50];
+////    cout << _hi << '\t' << _hf << endl;
+//    sprintf(filename,"phase_hi_%ghf_%g.dat",_hi,_hf); // Use the shortest representation %g
+////    cout << filename << endl;
+//    input = fopen(filename,"r");
+//    assert(input != NULL);
+//    for (int it = 0; it < lenT; ++it) {
+//        	fscanf(input,"%lf %lf %lf", &time_t[it], &DELTA_r_t[it], &DELTA_i_t[it]);
+//	}
+//    fclose(input);
+    FILE *data;
+    data = fopen("Floquet_2109_testing.dat","r");
+    assert(data != NULL);
+    for (int it = 0; it < lenT; ++it) {
+		fscanf(data,"%lf %lf %lf", &time_t[it], &DELTA_r_t[it], &DELTA_i_t[it]);
+
+	}
+    fclose(data);
     complex<double> Gamma1, Gamma2, temp;
     double Lambda;
     for (int ip = 0; ip < _pblock; ++ip) {
       p = ip - _PMAX;
       for (int iq = 0; iq<=ip;++iq){
 		q = iq - _PMAX;
-		Gamma1 = complex<double> (0.0,0.0);Gamma2 = complex<double> (0.0,0.0);
-		for (int it = 0; it < count; ++it) {
-			temp = Delta_t[it];
-			Gamma1 += (temp)		*exp(_myI*2*M_PI*(q-p)/_T*it*dt)/_T*dt;
-			Gamma2 += conj(temp)*exp(_myI*2*M_PI*(q-p)/_T*it*dt)/_T*dt;
+		Gamma1 = complex<double> (0.0,0.0);
+		Gamma2 = complex<double> (0.0,0.0);
+		for (int it = 0; it < lenT; ++it) {
+			temp = complex<double>(DELTA_r_t[it], DELTA_i_t[it]);
+			Gamma1 += (temp)		*exp(_myI*2*M_PI*(q-p)/_T*time_t[it])/_T*dt;
+			Gamma2 += conj(temp)	*exp(_myI*2*M_PI*(q-p)/_T*time_t[it])/_T*dt;
+//			Gamma1 += (temp)		*exp(_myI*2*M_PI*(q-p)/_T*it*dt)/_T*dt;
+//			Gamma2 += conj(temp)	*exp(_myI*2*M_PI*(q-p)/_T*it*dt)/_T*dt;
 		}
 		//cout << "gamma1=" << Gamma1 << "gamma2="<< Gamma2 << endl;
 		for (int im = 0; im < _NMAX; ++im) {
@@ -107,13 +122,16 @@ void cBdG_Edge::update(int nkx){
     	  }
       }
     }
+    delete []time_t;
+	delete []DELTA_r_t;
+	delete []DELTA_i_t;
   } else {
     double kx = -_kmax +2.0*_kmax/(_NKX-1)*nkx, xi = kx*kx-_mu;
     for (int ip = 0; ip < _pblock; ++ip) {
       p = ip - _PMAX;
       for (int im = 0; im < _NMAX; ++im) {
     	  _bdg_H(ip*_ibdg*_NMAX+im*_ibdg,ip*_ibdg*_NMAX+im*_ibdg) =
-    			  complex<double> (xi+pow(m*M_PI/_L,2.0)+_h+2*p*M_PI/_T,0.0);
+    			  complex<double> (xi+pow(m*M_PI/_L,2.0)+_hf+2*p*M_PI/_T,0.0);
 
     	  //_bdg_H(ip*_ibdg*_NMAX+im*_ibdg,ip*_ibdg*_NMAX+im*_ibdg+1) =
     	  //    			  complex<double> (_v*kx,0.0);
@@ -121,9 +139,9 @@ void cBdG_Edge::update(int nkx){
     	  _bdg_H(ip*_ibdg*_NMAX+im*_ibdg+1,ip*_ibdg*_NMAX+im*_ibdg) =
     			  complex<double> (_v*kx,0.0);
     	  _bdg_H(ip*_ibdg*_NMAX+im*_ibdg+1,ip*_ibdg*_NMAX+im*_ibdg+1) =
-    			  complex<double> (xi+pow(m*M_PI/_L,2.0)-_h+2*p*M_PI/_T,0.0);
+    			  complex<double> (xi+pow(m*M_PI/_L,2.0)-_hf+2*p*M_PI/_T,0.0);
     	  _bdg_H(ip*_ibdg*_NMAX+im*_ibdg+2,ip*_ibdg*_NMAX+im*_ibdg+2) =
-    			  complex<double> (-(xi+pow(m*M_PI/_L,2.0)+_h)+2*p*M_PI/_T,0.0);
+    			  complex<double> (-(xi+pow(m*M_PI/_L,2.0)+_hf)-2*p*M_PI/_T,0.0);
 
     	  //_bdg_H(ip*_ibdg*_NMAX+im*_ibdg+2,ip*_ibdg*_NMAX+im*_ibdg+3) =
     	  //    			  complex<double> (_v*kx,0.0);
@@ -131,7 +149,7 @@ void cBdG_Edge::update(int nkx){
     	  _bdg_H(ip*_ibdg*_NMAX+im*_ibdg+3,ip*_ibdg*_NMAX+im*_ibdg+2) =
     			  complex<double> (_v*kx,0.0);
     	  _bdg_H(ip*_ibdg*_NMAX+im*_ibdg+3,ip*_ibdg*_NMAX+im*_ibdg+3) =
-    			  complex<double> (-(xi+pow(m*M_PI/_L,2.0)-_h)+2*p*M_PI/_T,0.0);
+    			  complex<double> (-(xi+pow(m*M_PI/_L,2.0)-_hf)-2*p*M_PI/_T,0.0);
       }
 	}
   }
@@ -150,13 +168,14 @@ void cBdG_Edge::compute(){
 			update(recvbuf[i]);// distributed momentum value
 			ces.compute(_bdg_H,false); // only eigenvalues are computed
 			clock_t end = clock();
-			if (_rank==_root) cout << "task " << recvbuf[i] <<"out of " << recvcount << "used " << double (end-start)/ (double) CLOCKS_PER_SEC  << endl;
+			cout << "rank " << _rank << " has finished task " << recvbuf[i] <<" out of "
+					<< recvcount << " using " << double (end-start)/ (double) CLOCKS_PER_SEC  << endl;
 			_bdg_E = ces.eigenvalues();
 			for(int j = 0; j < _SMAX; ++j){
 			  localEig[j+i*_SMAX]=_bdg_E[j];
 			}
-			cout << "rank " << _rank << " has finished "<< recvcount << " tasks " << endl;
 		  }
+		  cout << "rank " << _rank << " has finished " << recvcount << " tasks." << endl;
 		}
 	}
 }
@@ -178,6 +197,10 @@ void cBdG_Edge::file_output(){
 	//  update(5);
 	  ofstream spectrum_output, akx;
     //ofstream bdgR,bdgI;
+	  char filename[50];
+	  //    cout << _hi << '\t' << _hf << endl;
+	      sprintf(filename,"spectrum_hi%ghf_%g.OUT",_hi,_hf); // Use the shortest representation %g
+	  //    cout << filename << endl;
     spectrum_output.open("spectrum.OUT");
     //bdgR.open("bdgR.OUT");bdgI.open("bdgI.OUT");assert(bdgR.is_open());assert(bdgI.is_open());
     //bdgR << _bdg_H.real() << endl;

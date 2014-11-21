@@ -18,7 +18,8 @@
 class cBdG: public cFloquet {
  protected:
 	int _pblock4, _ibdg;
-	double  _h, _mu, _T, _Delta0, _v, _kmax;
+	double _mu, _T, _v, _kmax;
+	double _hi, _hf;
  public:
   virtual void file_input()   =0; // this->file_input()
   virtual void file_output()   =0; // this->file_output()

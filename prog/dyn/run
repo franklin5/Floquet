@@ -1,7 +1,9 @@
 #!/bin/bash 
 #make clean
-cd /home/ld7/workspace/Floquet/src
+
+wkdir=$PWD
+cd ../../src
 make
-cd /home/ld7/workspace/Floquet/bdg_bulk/dyn
+cd $wkdir
 mpirun -np 6 floquet 
 #./floquet

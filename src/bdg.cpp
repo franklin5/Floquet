@@ -20,14 +20,14 @@ void cBdG_Bulk::file_input(){
       fscanf(input_bdg_bulk,"%s %d", dummyname, &intdummyvalue);
       _NKX = intdummyvalue;	if (ig == _root) cout << dummyname << "=" << _NKX << endl;
       fscanf(input_bdg_bulk,"%s %lf", dummyname, &dummyvalue);
-      _h = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _h << endl;
+      _hi = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _hi << endl;
+      fscanf(input_bdg_bulk,"%s %lf", dummyname, &dummyvalue);
+      _hf = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _hf << endl;
       fscanf(input_bdg_bulk,"%s %lf", dummyname, &dummyvalue);
       _mu = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _mu << endl;
       fscanf(input_bdg_bulk,"%s %lf", dummyname, &dummyvalue);
       _T = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _T << endl;
-      fscanf(input_bdg_bulk,"%s %lf", dummyname, &dummyvalue);
-      _Delta0 = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _Delta0 << endl;
-      fscanf(input_bdg_bulk,"%s %lf", dummyname, &dummyvalue);
+	  fscanf(input_bdg_bulk,"%s %lf", dummyname, &dummyvalue);
       _v = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _v << endl;
       fscanf(input_bdg_bulk,"%s %lf", dummyname, &dummyvalue);
       _kmax = dummyvalue;	if (ig == _root) cout << dummyname << "=" << _kmax << endl;
@@ -92,12 +92,12 @@ void cBdG_Bulk::update(int nk, double kx, double ky){
     double xi = kx*kx+ky*ky-_mu;
     for (int ip = 0; ip < _pblock; ++ip) {
       p = ip - _PMAX;
-      _bdg_H(ip*_ibdg,ip*_ibdg)   		=  complex<double> (xi+_h+2*p*M_PI/_T,0.0);
+      _bdg_H(ip*_ibdg,ip*_ibdg)   		=  complex<double> (xi+_hf+2*p*M_PI/_T,0.0);
       _bdg_H(ip*_ibdg+1,ip*_ibdg)   	=  complex<double> (_v*kx,_v*ky);
-      _bdg_H(ip*_ibdg+1,ip*_ibdg+1)   	=  complex<double> (xi-_h+2*p*M_PI/_T,0.0);
-      _bdg_H(ip*_ibdg+2,ip*_ibdg+2)   	=  complex<double> (-(xi+_h)+2*p*M_PI/_T,0.0);
+      _bdg_H(ip*_ibdg+1,ip*_ibdg+1)   	=  complex<double> (xi-_hf+2*p*M_PI/_T,0.0);
+      _bdg_H(ip*_ibdg+2,ip*_ibdg+2)   	=  complex<double> (-(xi+_hf)+2*p*M_PI/_T,0.0);
       _bdg_H(ip*_ibdg+3,ip*_ibdg+2)   	=  complex<double> (_v*kx,-_v*ky);
-      _bdg_H(ip*_ibdg+3,ip*_ibdg+3)   	=  complex<double> (-(xi-_h)+2*p*M_PI/_T,0.0);
+      _bdg_H(ip*_ibdg+3,ip*_ibdg+3)   	=  complex<double> (-(xi-_hf)+2*p*M_PI/_T,0.0);
     }
     //cout << _bdg_H << endl;
   }
