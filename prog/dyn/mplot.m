@@ -15,7 +15,7 @@ end
 hold off
 xlabel('k_x/k_F')
 ylabel('\epsilon/(\pi/T)')
-%axis([-0.5 0.5 -1 1])
+axis([-0.5 0.5 -1 1])
 % load('bdgR.OUT')
 % load('bdgI.OUT')
 % bdgH  = bdgR+1i*bdgI;

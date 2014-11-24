@@ -1,6 +1,6 @@
 PMAX	5
-NMAX	150
-NKX	11
+NMAX	80
+NKX	13
 
 hi	2.1
 hf	0.9

@@ -78,7 +78,8 @@ void cBdG_Edge::update(int nkx){
 //	}
 //    fclose(input);
     FILE *data;
-    data = fopen("Floquet_2109_testing.dat","r");
+//    data = fopen("Floquet_2109_testing.dat","r");
+    data = fopen("phase_hi_2.1hf_0.9.dat","r");
     assert(data != NULL);
     for (int it = 0; it < lenT; ++it) {
 		fscanf(data,"%lf %lf %lf", &time_t[it], &DELTA_r_t[it], &DELTA_i_t[it]);
@@ -97,8 +98,6 @@ void cBdG_Edge::update(int nkx){
 			temp = complex<double>(DELTA_r_t[it], DELTA_i_t[it]);
 			Gamma1 += (temp)		*exp(_myI*2*M_PI*(q-p)/_T*time_t[it])/_T*dt;
 			Gamma2 += conj(temp)	*exp(_myI*2*M_PI*(q-p)/_T*time_t[it])/_T*dt;
-//			Gamma1 += (temp)		*exp(_myI*2*M_PI*(q-p)/_T*it*dt)/_T*dt;
-//			Gamma2 += conj(temp)	*exp(_myI*2*M_PI*(q-p)/_T*it*dt)/_T*dt;
 		}
 		//cout << "gamma1=" << Gamma1 << "gamma2="<< Gamma2 << endl;
 		for (int im = 0; im < _NMAX; ++im) {
@@ -168,7 +167,7 @@ void cBdG_Edge::compute(){
 			update(recvbuf[i]);// distributed momentum value
 			ces.compute(_bdg_H,false); // only eigenvalues are computed
 			clock_t end = clock();
-			cout << "rank " << _rank << " has finished task " << recvbuf[i] <<" out of "
+			cout << "rank " << _rank << " has finished task " << i+1 <<" out of subtotal "
 					<< recvcount << " using " << double (end-start)/ (double) CLOCKS_PER_SEC  << endl;
 			_bdg_E = ces.eigenvalues();
 			for(int j = 0; j < _SMAX; ++j){
